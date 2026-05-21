@@ -6,6 +6,7 @@ import Login from './components/Login'
 import StudentForm from './components/StudentForm'
 import StudentTable from './components/StudentTable'
 import ExternalUsers from './components/ExternalUsers'
+import { Users, UserCheck, UserX, GraduationCap, BarChart3, PieChart } from 'lucide-react'
 import { authApi, clearToken, getToken, studentApi } from './services/api'
 
 export default function App() {
@@ -141,6 +142,44 @@ export default function App() {
     return Array.from(new Set(students.map((student) => student.major).filter(Boolean))).sort()
   }, [students])
 
+  const stats = useMemo(() => {
+    const total = students.length
+    const active = students.filter((s) => s.status === 'Aktif').length
+    const inactive = students.filter((s) => s.status === 'Cuti' || s.status === 'Nonaktif').length
+    const totalMajors = new Set(students.map((s) => s.major).filter(Boolean)).size
+
+    const semesters = students.map((s) => Number(s.semester)).filter((sem) => !isNaN(sem) && sem > 0)
+    const avgSemester = semesters.length > 0 ? (semesters.reduce((sum, s) => sum + s, 0) / semesters.length).toFixed(1) : '0.0'
+
+    const majorCounts = {}
+    students.forEach((s) => {
+      if (s.major) {
+        majorCounts[s.major] = (majorCounts[s.major] || 0) + 1
+      }
+    })
+    const majorsData = Object.entries(majorCounts)
+      .map(([name, count]) => ({ name, count, percentage: total > 0 ? ((count / total) * 100).toFixed(0) : 0 }))
+      .sort((a, b) => b.count - a.count)
+
+    const semCounts = {}
+    students.forEach((s) => {
+      const sem = Number(s.semester)
+      if (!isNaN(sem) && sem > 0) {
+        semCounts[sem] = (semCounts[sem] || 0) + 1
+      }
+    })
+
+    return {
+      total,
+      active,
+      inactive,
+      totalMajors,
+      avgSemester,
+      majorsData,
+      semCounts,
+    }
+  }, [students])
+
   const filteredStudents = useMemo(() => {
     let result = [...students]
 
@@ -195,10 +234,105 @@ export default function App() {
           <p className="mt-2 max-w-2xl text-sm text-blue-100">
             Kelola data mahasiswa dengan fitur tambah, tampil, edit, hapus, pencarian, validasi input, dan integrasi API eksternal.
           </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <Stat label="Total Mahasiswa" value={students.length} />
-            <Stat label="Mahasiswa Aktif" value={students.filter((item) => item.status === 'Aktif').length} />
-            <Stat label="Jumlah Jurusan" value={new Set(students.map((item) => item.major)).size} />
+        </section>
+
+        <section className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <StatCard
+            label="Total Mahasiswa"
+            value={stats.total}
+            description="Semua data terdaftar"
+            icon={Users}
+            color="from-blue-500 to-indigo-600"
+          />
+          <StatCard
+            label="Mahasiswa Aktif"
+            value={stats.active}
+            description={`${stats.total > 0 ? ((stats.active / stats.total) * 100).toFixed(0) : 0}% dari total`}
+            icon={UserCheck}
+            color="from-emerald-500 to-teal-600"
+          />
+          <StatCard
+            label="Cuti / Nonaktif"
+            value={stats.inactive}
+            description={`${stats.total > 0 ? ((stats.inactive / stats.total) * 100).toFixed(0) : 0}% dari total`}
+            icon={UserX}
+            color="from-rose-500 to-orange-600"
+          />
+          <StatCard
+            label="Rata-rata Semester"
+            value={`Sem. ${stats.avgSemester}`}
+            description="Tingkat studi mahasiswa"
+            icon={GraduationCap}
+            color="from-amber-500 to-yellow-600"
+          />
+          <StatCard
+            label="Jumlah Jurusan"
+            value={stats.totalMajors}
+            description="Bidang studi aktif"
+            icon={BarChart3}
+            color="from-purple-500 to-fuchsia-600"
+          />
+        </section>
+
+        <section className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+              <BarChart3 className="text-blue-600" size={20} />
+              <h3 className="text-base font-bold text-slate-900">Distribusi Semester</h3>
+            </div>
+            {stats.total === 0 ? (
+              <div className="flex h-48 items-center justify-center text-sm text-slate-400">
+                Tidak ada data mahasiswa untuk ditampilkan.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => {
+                  const count = stats.semCounts[sem] || 0
+                  const percent = stats.total > 0 ? (count / stats.total) * 100 : 0
+                  return (
+                    <div key={sem} className="flex items-center gap-3">
+                      <span className="w-12 text-xs font-semibold text-slate-600">Sem. {sem}</span>
+                      <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-blue-600 transition-all duration-500"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                      <span className="w-16 text-right text-xs font-bold text-slate-700">{count} mhs</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+              <PieChart className="text-blue-600" size={20} />
+              <h3 className="text-base font-bold text-slate-900">Penyebaran Jurusan</h3>
+            </div>
+            {stats.total === 0 || stats.majorsData.length === 0 ? (
+              <div className="flex h-48 items-center justify-center text-sm text-slate-400">
+                Tidak ada data jurusan untuk ditampilkan.
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[256px] overflow-y-auto pr-1">
+                {stats.majorsData.map((item) => (
+                  <div key={item.name} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-700">{item.name}</span>
+                      <span className="font-bold text-slate-600">{item.count} mhs ({item.percentage}%)</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
+                        style={{ width: `${item.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -235,11 +369,19 @@ export default function App() {
   )
 }
 
-function Stat({ label, value }) {
+function StatCard({ label, value, description, icon: Icon, color }) {
   return (
-    <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20">
-      <p className="text-sm text-blue-100">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
+    <div className="relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
+          <p className="mt-1 text-xs text-slate-400">{description}</p>
+        </div>
+        <div className={`rounded-2xl bg-gradient-to-br ${color} p-3 text-white shadow-sm`}>
+          <Icon size={20} />
+        </div>
+      </div>
     </div>
   )
 }
