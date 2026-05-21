@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Lock } from 'lucide-react'
 import { authApi, setToken } from '../services/api'
+import { toast } from 'react-hot-toast'
 
 export default function Login({ onAuthenticated }) {
   const [form, setForm] = useState({ email: 'admin@student.test', password: 'password' })
@@ -16,8 +17,10 @@ export default function Login({ onAuthenticated }) {
       const result = await authApi.login(form)
       setToken(result.token)
       onAuthenticated(result.user)
+      toast.success('Login berhasil.')
     } catch (err) {
       setError(err.message)
+      toast.error(err.message || 'Login gagal.')
     } finally {
       setLoading(false)
     }

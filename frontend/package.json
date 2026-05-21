@@ -7,18 +7,20 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
+    "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest"
+    "react-hot-toast": "^2.6.0",
+    "sweetalert2": "^11.26.24",
+    "vite": "latest"
   },
   "devDependencies": {
-    "tailwindcss": "latest",
+    "@eslint/js": "latest",
     "@tailwindcss/vite": "latest",
     "eslint": "latest",
-    "@eslint/js": "latest",
     "eslint-plugin-react-hooks": "latest",
     "eslint-plugin-react-refresh": "latest",
-    "globals": "latest"
+    "globals": "latest",
+    "tailwindcss": "latest"
   }
 }

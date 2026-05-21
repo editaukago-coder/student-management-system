@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Toaster, toast } from 'react-hot-toast'
+import Swal from 'sweetalert2'
 import Navbar from './components/Navbar'
 import Login from './components/Login'
 import StudentForm from './components/StudentForm'
@@ -61,44 +63,66 @@ export default function App() {
 
       if (selectedStudent) {
         await studentApi.update(selectedStudent.id, student.toPayload())
-        setMessage('Data mahasiswa berhasil diperbarui.')
+        const successMsg = 'Data mahasiswa berhasil diperbarui.'
+        setMessage(successMsg)
+        toast.success(successMsg)
       } else {
         await studentApi.create(student.toPayload())
-        setMessage('Data mahasiswa berhasil ditambahkan.')
+        const successMsg = 'Data mahasiswa berhasil ditambahkan.'
+        setMessage(successMsg)
+        toast.success(successMsg)
       }
 
       setSelectedStudent(null)
       await loadStudents()
     } catch (err) {
       setError(err.message)
+      toast.error(err.message || 'Gagal menyimpan data mahasiswa.')
     } finally {
       setLoading(false)
     }
   }
 
   async function handleDelete(id) {
-    const confirmed = window.confirm('Yakin ingin menghapus data mahasiswa ini?')
-    if (!confirmed) return
-
-    try {
-      setLoading(true)
-      setError('')
-      setMessage('')
-      await studentApi.remove(id)
-      setMessage('Data mahasiswa berhasil dihapus.')
-      await loadStudents()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
+    Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: 'Yakin ingin menghapus data mahasiswa ini?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#ef4444',
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+      customClass: {
+        popup: 'rounded-3xl',
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setLoading(true)
+          setError('')
+          setMessage('')
+          await studentApi.remove(id)
+          const successMsg = 'Data mahasiswa berhasil dihapus.'
+          setMessage(successMsg)
+          toast.success(successMsg)
+          await loadStudents()
+        } catch (err) {
+          setError(err.message)
+          toast.error(err.message || 'Gagal menghapus data mahasiswa.')
+        } finally {
+          setLoading(false)
+        }
+      }
+    })
   }
 
   async function handleLogout() {
     try {
       await authApi.logout()
+      toast.success('Logout berhasil.')
     } catch {
-      // token tetap dihapus di client
+      toast.success('Logout berhasil.')
     } finally {
       clearToken()
       setAdmin(null)
@@ -121,11 +145,17 @@ export default function App() {
   }
 
   if (!admin) {
-    return <Login onAuthenticated={setAdmin} />
+    return (
+      <>
+        <Toaster position="top-right" reverseOrder={false} />
+        <Login onAuthenticated={setAdmin} />
+      </>
+    )
   }
 
   return (
     <div className="min-h-screen bg-slate-100">
+      <Toaster position="top-right" reverseOrder={false} />
       <Navbar admin={admin} onLogout={handleLogout} />
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
