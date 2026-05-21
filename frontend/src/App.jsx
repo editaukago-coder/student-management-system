@@ -14,6 +14,9 @@ export default function App() {
   const [students, setStudents] = useState([])
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [search, setSearch] = useState('')
+  const [selectedMajor, setSelectedMajor] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('')
+  const [sortOrder, setSortOrder] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -127,18 +130,46 @@ export default function App() {
       clearToken()
       setAdmin(null)
       setStudents([])
+      setSearch('')
+      setSelectedMajor('')
+      setSelectedStatus('')
+      setSortOrder('')
     }
   }
 
+  const majors = useMemo(() => {
+    return Array.from(new Set(students.map((student) => student.major).filter(Boolean))).sort()
+  }, [students])
+
   const filteredStudents = useMemo(() => {
-    const keyword = search.toLowerCase()
-    return students.filter((student) => {
-      return [student.nim, student.name, student.major, student.email, student.status]
-        .join(' ')
-        .toLowerCase()
-        .includes(keyword)
-    })
-  }, [students, search])
+    let result = [...students]
+
+    if (search.trim()) {
+      const keyword = search.toLowerCase()
+      result = result.filter((student) => {
+        return [student.nim, student.name, student.major, student.email, student.status]
+          .join(' ')
+          .toLowerCase()
+          .includes(keyword)
+      })
+    }
+
+    if (selectedMajor) {
+      result = result.filter((student) => student.major === selectedMajor)
+    }
+
+    if (selectedStatus) {
+      result = result.filter((student) => student.status === selectedStatus)
+    }
+
+    if (sortOrder === 'asc') {
+      result.sort((a, b) => a.semester - b.semester)
+    } else if (sortOrder === 'desc') {
+      result.sort((a, b) => b.semester - a.semester)
+    }
+
+    return result
+  }, [students, search, selectedMajor, selectedStatus, sortOrder])
 
   if (authLoading) {
     return <div className="flex min-h-screen items-center justify-center text-slate-600">Memuat aplikasi...</div>
@@ -187,6 +218,13 @@ export default function App() {
           students={filteredStudents}
           search={search}
           setSearch={setSearch}
+          selectedMajor={selectedMajor}
+          setSelectedMajor={setSelectedMajor}
+          selectedStatus={selectedStatus}
+          setSelectedStatus={setSelectedStatus}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          majors={majors}
           onEdit={setSelectedStudent}
           onDelete={handleDelete}
         />

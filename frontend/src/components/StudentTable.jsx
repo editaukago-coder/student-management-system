@@ -1,6 +1,28 @@
-import { Edit, Trash2, Search } from 'lucide-react'
+import { Edit, Trash2, Search, SlidersHorizontal } from 'lucide-react'
 
-export default function StudentTable({ students, search, setSearch, onEdit, onDelete }) {
+export default function StudentTable({
+  students,
+  search,
+  setSearch,
+  selectedMajor,
+  setSelectedMajor,
+  selectedStatus,
+  setSelectedStatus,
+  sortOrder,
+  setSortOrder,
+  majors,
+  onEdit,
+  onDelete,
+}) {
+  const hasActiveFilters = Boolean(search || selectedMajor || selectedStatus || sortOrder)
+
+  function handleResetFilters() {
+    setSearch('')
+    setSelectedMajor('')
+    setSelectedStatus('')
+    setSortOrder('')
+  }
+
   return (
     <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -17,6 +39,75 @@ export default function StudentTable({ students, search, setSearch, onEdit, onDe
             placeholder="Cari nama, NIM, jurusan..."
             className="w-full rounded-xl border border-slate-300 py-3 pl-10 pr-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
           />
+        </div>
+      </div>
+
+      <div className="mt-5 border-t border-slate-100 pt-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2 text-slate-700">
+            <SlidersHorizontal size={18} className="text-blue-600" />
+            <span className="text-sm font-bold tracking-wide uppercase text-slate-700">Filter & Urutan</span>
+          </div>
+          {hasActiveFilters && (
+            <button
+              onClick={handleResetFilters}
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
+            >
+              Bersihkan Filter
+            </button>
+          )}
+        </div>
+
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-500 block mb-1">
+              Jurusan
+            </label>
+            <select
+              value={selectedMajor}
+              onChange={(e) => setSelectedMajor(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="">Semua Jurusan</option>
+              {majors.map((major) => (
+                <option key={major} value={major}>
+                  {major}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-500 block mb-1">
+              Status
+            </label>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="">Semua Status</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Cuti">Cuti</option>
+              <option value="Lulus">Lulus</option>
+              <option value="Nonaktif">Nonaktif</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-500 block mb-1">
+              Urutkan Semester
+            </label>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="">Bawaan</option>
+              <option value="asc">Semester: Terendah ke Tertinggi</option>
+              <option value="desc">Semester: Tertinggi ke Terendah</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -69,8 +160,21 @@ export default function StudentTable({ students, search, setSearch, onEdit, onDe
 
             {students.length === 0 && (
               <tr>
-                <td colSpan="7" className="py-10 text-center text-slate-500">
-                  Tidak ada data mahasiswa.
+                <td colSpan="7" className="py-10 text-center">
+                  {hasActiveFilters ? (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <p className="font-semibold text-slate-700">Tidak ada hasil yang cocok</p>
+                      <p className="mt-1 text-sm text-slate-500">Coba ubah kata kunci pencarian atau bersihkan filter.</p>
+                      <button
+                        onClick={handleResetFilters}
+                        className="mt-4 rounded-xl bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
+                      >
+                        Bersihkan Filter
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-slate-500">Tidak ada data mahasiswa.</span>
+                  )}
                 </td>
               </tr>
             )}
