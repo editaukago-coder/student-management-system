@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Lock } from 'lucide-react'
 import { authApi, setToken } from '../services/api'
+import { toast } from 'react-hot-toast'
 
 export default function Login({ onAuthenticated }) {
   const [form, setForm] = useState({ email: 'admin@student.test', password: 'password' })
@@ -16,15 +17,17 @@ export default function Login({ onAuthenticated }) {
       const result = await authApi.login(form)
       setToken(result.token)
       onAuthenticated(result.user)
+      toast.success('Login berhasil.')
     } catch (err) {
       setError(err.message)
+      toast.error(err.message || 'Login gagal.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-100 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-linear-to-br from-blue-50 via-white to-slate-100 px-4">
       <section className="w-full max-w-md rounded-3xl bg-white p-8 shadow-xl shadow-slate-200">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-white">

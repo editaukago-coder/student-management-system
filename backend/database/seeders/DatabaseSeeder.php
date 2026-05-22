@@ -19,16 +19,34 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $students = [
-            ['nim' => '2301001', 'name' => 'Andi Pratama', 'major' => 'Teknik Informatika', 'semester' => 3, 'email' => 'andi@student.test', 'phone' => '081234567801', 'address' => 'Bandung', 'status' => 'Aktif'],
-            ['nim' => '2301002', 'name' => 'Siti Rahma', 'major' => 'Sistem Informasi', 'semester' => 5, 'email' => 'siti@student.test', 'phone' => '081234567802', 'address' => 'Jakarta', 'status' => 'Aktif'],
-            ['nim' => '2301003', 'name' => 'Budi Santoso', 'major' => 'Teknik Informatika', 'semester' => 7, 'email' => 'budi@student.test', 'phone' => '081234567803', 'address' => 'Tegal', 'status' => 'Cuti'],
-            ['nim' => '2301004', 'name' => 'Dewi Lestari', 'major' => 'Manajemen Informatika', 'semester' => 2, 'email' => 'dewi@student.test', 'phone' => '081234567804', 'address' => 'Cirebon', 'status' => 'Aktif'],
-            ['nim' => '2301005', 'name' => 'Rizky Maulana', 'major' => 'Sistem Informasi', 'semester' => 8, 'email' => 'rizky@student.test', 'phone' => '081234567805', 'address' => 'Bekasi', 'status' => 'Lulus'],
-        ];
+        $firstNames = ['Andi', 'Budi', 'Candra', 'Dedi', 'Eko', 'Fajar', 'Guntur', 'Hadi', 'Indra', 'Joko', 'Kurniawan', 'Lukman', 'Maulana', 'Nugroho', 'Pratama', 'Rizky', 'Santoso', 'Taufik', 'Wahyu', 'Yudi', 'Siti', 'Dewi', 'Rini', 'Sari', 'Indah', 'Fitri', 'Wati', 'Sri', 'Lestari', 'Putri', 'Kartika', 'Mega', 'Novi', 'Ayu', 'Dian', 'Ratna', 'Anisa', 'Siska', 'Yanti', 'Bambang'];
+        $lastNames = ['Pratama', 'Santoso', 'Hidayat', 'Saputra', 'Kusuma', 'Wibowo', 'Gunawan', 'Setiawan', 'Nugraha', 'Wijaya', 'Siregar', 'Lubis', 'Nasution', 'Simanjuntak', 'Harahap', 'Ginting', 'Sembiring', 'Tarigan', 'Pane', 'Hasibuan', 'Rahma', 'Lestari', 'Putri', 'Sari', 'Fitriani', 'Utami', 'Wulandari', 'Kusumawati', 'Anggraini', 'Sulistiowati'];
+        $majors = ['Teknik Informatika', 'Sistem Informasi', 'Teknik Komputer', 'Manajemen Informatika', 'Rekayasa Perangkat Lunak', 'Teknik Elektro'];
+        $statuses = ['Aktif', 'Cuti', 'Lulus', 'Nonaktif'];
+        $cities = ['Jakarta', 'Bandung', 'Surabaya', 'Semarang', 'Yogyakarta', 'Medan', 'Makassar', 'Palembang', 'Tangerang', 'Bekasi', 'Depok', 'Bogor', 'Malang', 'Solo', 'Cirebon'];
+        $streets = ['Jl. Merdeka', 'Jl. Sudirman', 'Jl. Gajah Mada', 'Jl. Pemuda', 'Jl. Ahmad Yani', 'Jl. Diponegoro', 'Jl. Pahlawan', 'Jl. Gatot Subroto', 'Jl. Asia Afrika', 'Jl. Dago'];
+        $prefixes = ['0812', '0813', '0821', '0852', '0878', '0896'];
 
-        foreach ($students as $student) {
-            Student::updateOrCreate(['nim' => $student['nim']], $student);
+        for ($i = 1; $i <= 169; $i++) {
+            $firstName = $firstNames[($i - 1) % count($firstNames)];
+            $lastName = $lastNames[(int)(($i - 1) / count($firstNames)) % count($lastNames)];
+            $street = $streets[($i - 1) % count($streets)];
+            $number = (($i - 1) % 150) + 1;
+            $city = $cities[(int)(($i - 1) / count($streets)) % count($cities)];
+            $prefix = $prefixes[($i - 1) % count($prefixes)];
+
+            Student::updateOrCreate(
+                ['nim' => sprintf('2024%05d', $i)],
+                [
+                    'name' => "$firstName $lastName",
+                    'major' => $majors[($i - 1) % count($majors)],
+                    'semester' => (($i - 1) % 8) + 1,
+                    'email' => sprintf('mahasiswa%03d@student.test', $i),
+                    'phone' => $prefix . sprintf('%08d', 12345000 + $i),
+                    'address' => "$street No. $number, $city",
+                    'status' => $statuses[($i - 1) % count($statuses)],
+                ]
+            );
         }
     }
 }
