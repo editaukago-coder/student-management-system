@@ -229,7 +229,7 @@ export default function App() {
       <Navbar admin={admin} onLogout={handleLogout} />
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
-        <section className="rounded-3xl bg-gradient-to-r from-blue-600 to-slate-900 p-6 text-white shadow-lg">
+        <section className="rounded-3xl bg-linear-to-r from-blue-600 to-slate-900 p-6 text-white shadow-lg">
           <h2 className="text-2xl font-bold">Dashboard Mahasiswa</h2>
           <p className="mt-2 max-w-2xl text-sm text-blue-100">
             Kelola data mahasiswa dengan fitur tambah, tampil, edit, hapus, pencarian, validasi input, dan integrasi API eksternal.
@@ -325,7 +325,7 @@ export default function App() {
                     </div>
                     <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
+                        className="h-full rounded-full bg-linear-to-r from-emerald-500 to-teal-500 transition-all duration-500"
                         style={{ width: `${item.percentage}%` }}
                       />
                     </div>
@@ -378,7 +378,7 @@ function StatCard({ label, value, description, icon: Icon, color }) {
           <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
           <p className="mt-1 text-xs text-slate-400">{description}</p>
         </div>
-        <div className={`rounded-2xl bg-gradient-to-br ${color} p-3 text-white shadow-sm`}>
+        <div className={`rounded-2xl bg-linear-to-br ${color} p-3 text-white shadow-sm`}>
           <Icon size={20} />
         </div>
       </div>
