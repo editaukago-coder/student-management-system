@@ -1,4 +1,5 @@
 import { Edit, Trash2, Search, SlidersHorizontal } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 
 export default function StudentTable({
   students,
@@ -14,6 +15,27 @@ export default function StudentTable({
   onEdit,
   onDelete,
 }) {
+  const STUDENTS_PER_PAGE = 10
+  const [currentPage, setCurrentPage] = useState(1)
+
+  // Reset to page 1 when filters/search/sort change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, selectedMajor, selectedStatus, sortOrder])
+
+  const totalPages = Math.max(1, Math.ceil(students.length / STUDENTS_PER_PAGE))
+
+  // If current page becomes invalid (e.g. after delete), move to last valid page
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [students.length, totalPages, currentPage])
+
+  const paginatedStudents = useMemo(() => {
+    const start = (currentPage - 1) * STUDENTS_PER_PAGE
+    return students.slice(start, start + STUDENTS_PER_PAGE)
+  }, [students, currentPage])
   const hasActiveFilters = Boolean(search || selectedMajor || selectedStatus || sortOrder)
 
   function handleResetFilters() {
@@ -125,7 +147,7 @@ export default function StudentTable({
             </tr>
           </thead>
           <tbody>
-            {students.map((student) => (
+            {paginatedStudents.map((student) => (
               <tr key={student.id} className="rounded-2xl bg-slate-50 text-slate-700">
                 <td className="rounded-l-2xl px-3 py-4 font-semibold">{student.nim}</td>
                 <td className="px-3 py-4">{student.name}</td>
@@ -180,6 +202,29 @@ export default function StudentTable({
             )}
           </tbody>
         </table>
+      </div>
+      {/* Pagination controls */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-sm text-slate-600">Menampilkan {Math.min(students.length, STUDENTS_PER_PAGE)} dari {students.length} data</div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className={`rounded-xl px-3 py-1 text-sm font-semibold transition ${currentPage === 1 ? 'bg-slate-100 text-slate-400' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50'}`}
+          >
+            Previous
+          </button>
+
+          <div className="text-sm text-slate-700">Page {currentPage} of {totalPages}</div>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className={`rounded-xl px-3 py-1 text-sm font-semibold transition ${currentPage === totalPages ? 'bg-slate-100 text-slate-400' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50'}`}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </section>
   )
