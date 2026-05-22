@@ -11,4 +11,4 @@ setelah itu jalankan php artisan serve
 buka terminal baru: ketik cd "D:\Document\Kampus\student-management-system\frontend"
 setelah itu jalankan npm run dev
 
-akses lewat local host
+akses lewat local host dari terminal frontend
